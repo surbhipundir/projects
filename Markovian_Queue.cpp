@@ -1,41 +1,24 @@
-// Jason Jue
-
-
 #include <iostream>
 #include "rv.h"
 #include "event.h"
 
 // Simulates an General queueing system.  The simulation terminates once 500000 customers depart from the system.
-int main()
-{
+int main(){
 	using namespace std;
-	EventList Elist;              // Create event list
 	enum { ARR, DEP1, DEP2, DEP3 };     // Define the 1 arrival for 3 queues and 3 final departure rates
 	double lambda = 0.0;         // for Arrival rate
 	double mu1 = 0.0;              // Service rate for queue 1
 	double mu2 = 0.0;              // Service rate for queue 2
 	double mu3 = 0.0;              // Service rate for queue 3
-	double rs1 = 0.0;				//probabilty for arriving customer enters queue 1
-	double rs2 = 0.0;				//probabilty for arriving customer enters queue 2
-	double r11 = 0.0;				//probabilty for arriving customer depart queue 1, enters queue 1
-	double r13 = 0.0;				//probabilty for arriving customer depart queue 1, enter queue 3
-	double r3d = 0.0;				//probabilty for arriving customer departs queue 3, leaves network
-	double r32 = 0.0;				//probabilty for arriving customer departs queue 3, ,goes back to queue 2
+	double rs1 = 0.0;		//probabilty for arriving customer enters queue 1
+	double rs2 = 0.0;		//probabilty for arriving customer enters queue 2
+	double r11 = 0.0;		//probabilty for arriving customer depart queue 1, enters queue 1
+	double r13 = 0.0;		//probabilty for arriving customer depart queue 1, enter queue 3
+	double r3d = 0.0;		//probabilty for arriving customer departs queue 3, leaves network
+	double r32 = 0.0;		//probabilty for arriving customer departs queue 3, ,goes back to queue 2
 
 	double clock = 0.0;           // System clock
-	int Ndep = 0; //to generate overall dept
-	int currentCustCount1; 	//current customer in queue 1
-	int currentCustCount2; 	//current customer in queue 2
-	int currentCustCount3;  //current customer in queue 3
-	int totalArr1;  //total number of arrivals in queue 1
-	int totalArr2;  //total number of arrivals in queue 2
-	int totalArr3;  //total number of arrivals in queue 3
-	int totalDept1;  //total number of departures in queue 1
-	int totalDept2;  //total number of departures in queue 2
-	int totalDept3;  //total number of departures in queue 3
-	int done;  //total number of departure for all queues
-
-//	int done ;                 // End condition satisfied?
+	int Ndep = 0; 			//to generate overall dept
 	double area1 = 0.0;			  //area of the region for queue 1
 	double area2 = 0.0;			  //area of the region for queue 2
 	double area3 = 0.0;			  //area of the region for queue 3
@@ -69,6 +52,20 @@ int main()
 	double utilizationTheo1 = 0.0;//utilization for queue 1
 	double utilizationTheo2 = 0.0;//utilization for queue 2
 	double utilizationTheo3 = 0.0;//utilization for queue 3
+
+	EventList Elist;              // Create event list
+
+	int currentCustCount1; 	//current customer in queue 1
+	int currentCustCount2; 	//current customer in queue 2
+	int currentCustCount3;  //current customer in queue 3
+	int totalArr1;  	//total number of arrivals in queue 1
+	int totalArr2		 //total number of arrivals in queue 2
+	int totalArr3;  	//total number of arrivals in queue 3
+	int totalDept1;  	//total number of departures in queue 1
+	int totalDept2;  	//total number of departures in queue 2
+	int totalDept3;  	//total number of departures in queue 3
+	int done;  		//total number of departure for all queues
+
 
 
 	//code to enter the value from user
@@ -165,7 +162,6 @@ int main()
 				}
 				else {
 					
-
 					//process arrival at queue 2
 					currentCustCount2++; 
 					totalArr2++; 
