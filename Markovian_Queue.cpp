@@ -159,8 +159,7 @@ int main(){
 						
 						Elist.insert(clock + exp_rv(mu1), DEP1);
 					}
-				}
-				else {
+				}else {
 					
 					//process arrival at queue 2
 					currentCustCount2++; 
@@ -196,8 +195,7 @@ int main(){
 					if (currentCustCount1 == 1) {
 						Elist.insert(clock + exp_rv(mu1), DEP1);
 					}
-				}
-				else {
+				}else {
 					//process arrival at queue 3
 					currentCustCount3++; 
 					totalArr3++; 
@@ -242,8 +240,7 @@ int main(){
 				//the departing customer can either leave the queueing network or go to queue 2
 				if (uni_rv() < r3d) {
 					Ndep++;
-				}
-				else {
+				}else {
 					//process arrival at queue 2
 					currentCustCount2++; 
 					totalArr2++; 
