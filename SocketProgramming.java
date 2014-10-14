@@ -9,54 +9,42 @@ import java.util.concurrent.Semaphore;
 
 //class to do all the communication with client
 class ClientWorker implements Runnable {
-	private Socket client;// to establish connection
-	public ArrayList<String> movieName = new ArrayList<String>();// to store the
-																	// name of
-																	// movies
-	private ArrayList<String> movieListCount = new ArrayList<String>();// to
-																		// store
-																		// the
-																		// movie
-																		// count
-
-	Semaphore mutex1 = new Semaphore(1);// to prevent the movie count
+	private Socket client;									// to establish connection
+	public ArrayList<String> movieName = new ArrayList<String>();				// to store 
+	private ArrayList<String> movieListCount = new ArrayList<String>();
+	Semaphore mutex1 = new Semaphore(1);							// to prevent the movie count
+	BufferedReader in = null;								// to take input from client
+	PrintWriter out = null;									// to send to client
 
 	ClientWorker(Socket client, ArrayList<String> movieListCount) {
 		this.client = client;
-		this.movieListCount = movieListCount;// passes movie count
-
+		this.movieListCount = movieListCount;						// passes movie count
 	}
 
-	BufferedReader in = null;// to take input from client
-	PrintWriter out = null;// to send to client
 
 	public void run() {
-		String line = "";// to get the movie and count from client and store in
-							// this variable
-		String flag = "";// to send the status of movie as avaible or not
-		String movieNameClient = "";// to get movie name
-		String ticketCountClient = "";// to get count
+		String line = "";						// to get the movie and count from client and store in this variable
+		String flag = "";						// to send the status of movie as avaible or not
+		String movieNameClient = "";					// to get movie name
+		String ticketCountClient = "";					// to get count
+		String clientServerFlag = "";					// to check if the C option is printed by client
+		String serverClientFlag = "";					// to signal the cleint it can exit
+		String cofirmationFlag = "";					// to see whether client choose
 
 		try {
 			// read response from client
-			in = new BufferedReader(new InputStreamReader(
-					client.getInputStream()));
+			in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 			// give back response to client
 			out = new PrintWriter(client.getOutputStream(), true);
 		} catch (IOException e) {
 			System.out.println("in or out failed");
 		}
-		String clientServerFlag = "";// to check if the C option is printed by
-										// client
-		String serverClientFlag = "";// to signal the cleint it can exit
-		String cofirmationFlag = "";// to see whether client choose
-									// cancel/confirmed
+		// cancel/confirmed
 		try {
 			// array to store all the movie names
 			movieName = movieSelect();
 			// send movie name to client
-			ObjectOutputStream objectOutput = new ObjectOutputStream(
-					client.getOutputStream());
+			ObjectOutputStream objectOutput = new ObjectOutputStream(client.getOutputStream());
 			objectOutput.writeObject(movieName);
 		} catch (IOException e) {
 			System.out.println("Write array exception " + e);
@@ -64,7 +52,6 @@ class ClientWorker implements Runnable {
 		// get value of movie name and number of tickets from cleint
 		try {
 			clientServerFlag = in.readLine();
-			// System.out.println("firsr flag"+clientServerFlag);
 		} catch (IOException e1) {
 			System.out.println("read from client exception " + e1);
 		}
@@ -73,61 +60,39 @@ class ClientWorker implements Runnable {
 		if (clientServerFlag.equalsIgnoreCase("false")) {
 			out.println("server");
 		} else {
-			//System.out.println("clientServerFlag "+clientServerFlag);
 			if (clientServerFlag.equalsIgnoreCase("true")) {
 				try {
 					// to get movie name from client, with count
 					line = in.readLine();
-					// System.out.println("movie at server "+line);
 				} catch (IOException e) {
-					System.out.println("read exception in fetching movie name "
-							+ e);
+					System.out.println("read exception in fetching movie name "+ e);
 				}
 				try {
 					// if data is not null, than processthe count for that movie
 					if (line != null) {
-						// mutex.acquire();
 						String[] getCleintData = line.split("yyyxe");
-
-						movieNameClient = getCleintData[0];// get movie name
-						ticketCountClient = getCleintData[1];// get count
-						flag = checkTicketsAvailability(movieNameClient,
-								ticketCountClient);// movie count-number of
-													// ticket
-						// System.out.println("value of flag "+flag);
-						out.println(flag);// send the status whether movie is
-											// avaialbe or not
-
-						// mutex.release();
+						movieNameClient = getCleintData[0];				// get movie name
+						ticketCountClient = getCleintData[1];				// get count
+						// movie count-number of ticket
+						flag = checkTicketsAvailability(movieNameClient,ticketCountClient);
+						// send the status whether movie is avaialbe or not
+						out.println(flag);
 					}
 					try {
-						// flagnew= 0;
-						cofirmationFlag = in.readLine();// to see whether client
-														// entered
-														// confirm/cancel
-						// System.out.println("cofirmationFlag "+cofirmationFlag);
-						if (cofirmationFlag.equalsIgnoreCase("cancel")) {// if
-																			// it
-																			// preseed
-																			// cancel
-							cancelCount(movieNameClient, ticketCountClient);// function
-																			// to
-																			// increment
-																			// the
-																			// decremented
-																			// count
-																			// again
-							// flagnew=1;
-
+						// to see whether client entered confirm/cancel
+						cofirmationFlag = in.readLine();
+						if (cofirmationFlag.equalsIgnoreCase("cancel")) {
+							// if it preseed cancel
+							// function to increment the decremented count again
+							cancelCount(movieNameClient, ticketCountClient);
 						}
 
 					} catch (Exception e3) {
-						// System.out.println("Exception in cancelaation");
+						 System.out.println("Exception in cancelaation");
 					}
 				} catch (Exception e) {
 					System.out.println("write failed in setting flag " + e);
 				}
-				// mutex1.release();
 				try {
 					// to check if c option is entered from client
 					clientServerFlag = in.readLine();
@@ -136,19 +101,12 @@ class ClientWorker implements Runnable {
 						out.println("server");
 					}
 					}
-					// System.out.println("second flag"+clientServerFlag);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					// e.printStackTrace();
-				}
+					System.out.println("Exception in sendind " + e);				}
 			}
 		}
 		}
 		try {
-
-			/*
-			 * in.close(); out.close();
-			 */
 			client.close();
 
 		} catch (IOException e) {
@@ -161,9 +119,8 @@ class ClientWorker implements Runnable {
 	// read from input file and return the name of movie
 	public ArrayList<String> movieSelect() {
 		BufferedReader br = null;
-		// int randomNumber;
-		ArrayList<String> movieName = new ArrayList<String>();// to get the
-																// movie name
+		// to get the movie name
+		ArrayList<String> movieName = new ArrayList<String>();
 		String fileName = "";
 		try {
 			// logic to read the text file
@@ -177,20 +134,13 @@ class ClientWorker implements Runnable {
 					sb.append(System.lineSeparator());
 					line = br.readLine();
 					if (line != null) {
-						String str = line.substring(0,
-								(line.indexOf("\t") - 1) + 1);
-						movieName.add(str);// the the data from text file to
-											// list
+						String str = line.substring(0,(line.indexOf("\t") - 1) + 1);
+						// the the data from text file tolist
+						movieName.add(str);
 					}
 				}
 			} else {
 				System.out.println("Please enter valid input file name. ");// error
-																			// when
-																			// the
-																			// file
-																			// is
-																			// not
-																			// present
 			}
 		} catch (Exception e) {
 			System.out.println("File not found. ");
@@ -223,10 +173,6 @@ class ClientWorker implements Runnable {
 			if (name.equalsIgnoreCase(movieName)) {
 
 				movieCounts = Integer.parseInt(this.movieListCount.get(count));// get
-																				// the
-																				// available
-																				// count
-
 				mutex1.acquire();
 				movieCounts = movieCounts - ticketCount;
 
@@ -235,19 +181,13 @@ class ClientWorker implements Runnable {
 
 					// store back this updated count to arraylist
 					this.movieListCount.set(count, movieCounts + "");
-
 				} else {
 					flag = "f";// if ticket not available
-
 				}
 				mutex1.release();
 			}
 
 		}
-		
-		  /*for(int i=0;i<this.movieListCount.size();i++){
-			  System.out.println("this.movieListCount     "+  this.movieListCount.get(i));
-		  }*/
 		return flag;
 	}
 
@@ -264,124 +204,13 @@ class ClientWorker implements Runnable {
 			count1++;
 			if (name.equalsIgnoreCase(movieName)) {
 
-				movieCounts1 = Integer
-						.parseInt(this.movieListCount.get(count1));// get the
-																	// avaiable
-																	// count
+				movieCounts1 = Integer.parseInt(this.movieListCount.get(count1));// get the avaiable count
 				// mutex1.wait();
 				movieCounts1 = movieCounts1 + ticketCount1;// add back the count
 
 				// store back this updated count to arraylist
 				this.movieListCount.set(count1, movieCounts1 + "");
-
 			}
-
 		}
-		/*
-		 * for(int i=0;i<this.movieListCount.size();i++)
-		 * System.out.println("this.movieListCount     "
-		 * +this.movieListCount.get(i));
-		 */
-		// return flag;
 	}
 }
-
-// main class where socket connection is establised
-class SocketThrdServer {
-	ServerSocket server = null;
-	public ArrayList<String> movieNameListCount = new ArrayList<String>();// get
-																			// the
-																			// count
-
-	// logic when to exit from srver
-	public void listenSocket(int port) {
-		try {
-			server = new ServerSocket(port);
-			System.out.println("Server running on port " + port + ","
-					+ " use ctrl-C to end");
-		} catch (IOException e) {
-			System.out.println("Error creating socket");
-			System.exit(-1);
-		}
-		try {
-			movieNameListCount = movieCount();
-		} catch (Exception e1) {
-			System.out.println("Exception in loading intial count");
-		}
-		while (true) {
-			// this to create one thread per client
-			ClientWorker w;
-			try {
-				/*
-				 * for(int i=0;i<movieNameListCount.size();i++)
-				 * System.out.println
-				 * ("movieNameListCount....... "+movieNameListCount.get(i));
-				 */
-				w = new ClientWorker(server.accept(), movieNameListCount);
-				Thread t = new Thread(w);
-				t.start();
-			} catch (IOException e) {
-				System.out.println("Accept failed");
-				System.exit(-1);
-			}
-		}
-	}
-
-	// close connection
-	protected void finalize() {
-		try {
-			server.close();
-		} catch (IOException e) {
-			System.out.println("Could not close socket");
-			System.exit(-1);
-		}
-	}
-
-	// main function of server,
-	public static void main(String[] args) {
-		if (args.length != 1) {
-			System.out.println("Usage: java SocketThrdServer port");
-			System.exit(1);
-		}
-
-		SocketThrdServer server = new SocketThrdServer();
-		// to fetch the given port number enter
-		int port = Integer.valueOf(args[0]);// get the port
-		server.listenSocket(port);
-	}
-
-	// function to return movie count and movie name in arraylist
-	public ArrayList<String> movieCount() throws Exception {
-
-		// read the movie name
-		BufferedReader br = new BufferedReader(new FileReader("movies.txt"));
-		ArrayList<String> movieTicketCount = new ArrayList<String>();
-
-		try {
-			StringBuilder sb = new StringBuilder();
-			String line = "";
-			while (line != null) {
-				sb.append(line);
-				sb.append(System.lineSeparator());
-				line = br.readLine();
-				if (line != null) {
-					String str = line
-							.substring(0, (line.indexOf("\t") - 1) + 1);
-					String str1 = line.substring(line.length() - 3);
-					String tempStr = str1.replace("\t", " ").trim();
-					movieTicketCount.add(str);
-					// System.out.println("value inside movie count() "+movieTicketCount.add(tempStr));
-					movieTicketCount.add(tempStr);// store the movie name and
-													// count into an arraylist
-				}
-			}
-		} finally {
-			br.close();
-		}
-		return movieTicketCount;
-
-	}
-
-}
-
-
